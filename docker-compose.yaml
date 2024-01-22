@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  metabase-nginx:
+    image: nginx:stable
+    labels:
+      - com.zabbix.agentd.hostname="Zabbix server"
+      - com.zabbix.agentd.templates="Docker by Zabbix agent 2"
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+      - 8089:8089
+      - 6443:6443
+    networks:
+      - nginx-net
+    volumes:
+      - "./nginx-service.conf:/etc/nginx/conf.d/default.conf"
+      - "./jenkins.conf:/etc/nginx/conf.d/jenkins.conf"
+      - "./bundle.crt:/usr/local/ssl/bundle.crt:ro"
+      - "./private.key:/usr/local/ssl/private.key:ro"
+      - "./nginx.conf:/etc/nginx/nginx.conf"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./htpasswd.users:/etc/nginx/htpasswd.users"
+      #- "/opt/crowdsec-prod/logs:/var/log/nginx"
+      - "./nginx-log:/var/log/nginx"
+networks:
+  nginx-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.200.16.0/20
